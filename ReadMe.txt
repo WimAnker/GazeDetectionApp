@@ -54,6 +54,10 @@ Dit project bevat een desktop applicatie geschreven in Python, gebruikmakend van
 3. **Download de projectbestanden**:
    - Download de projectmap van OSF en pak de bestanden uit naar een gewenste locatie op je computer.
 
+   OF
+
+   Ga naar de GazeDetectionApp GitHub repository en download de bestanden door te klikken op de groene knop Code en te kiezen voor         Download ZIP. Pak de gedownloade ZIP-bestanden uit naar een gewenste locatie op je computer.
+
 4. **Installeer vereiste pakketten**:
    - Navigeer naar de map waar je de projectbestanden hebt uitgepakt.
    - Voer het volgende commando uit om de benodigde pakketten te installeren:
