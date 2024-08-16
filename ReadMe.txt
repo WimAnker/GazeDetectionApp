@@ -19,6 +19,12 @@ Dit project bevat een desktop applicatie geschreven in Python, gebruikmakend van
 2. **Download de projectbestanden**:
    - Download de projectmap van OSF en pak de bestanden uit naar een gewenste locatie op je computer.
 
+    OF
+
+   Ga naar de GazeDetectionApp GitHub repository https://github.com/WimAnker/GazeDetectionApp en download de bestanden door te klikken     op de groene knop Code en te kiezen voor Download ZIP. (zorg ervoor dat je de master branch geselecteerd hebt als dat nodig is).
+   Pak de gedownloade ZIP-bestanden uit naar een gewenste locatie op je computer.
+
+
 3. **Installeer vereiste pakketten**:
    - Open een command prompt (cmd) en navigeer naar de map waar je de projectbestanden hebt uitgepakt.
    - Voer het volgende commando uit om de benodigde pakketten te installeren:
@@ -56,7 +62,9 @@ Dit project bevat een desktop applicatie geschreven in Python, gebruikmakend van
 
    OF
 
-   Ga naar de GazeDetectionApp GitHub repository en download de bestanden door te klikken op de groene knop Code en te kiezen voor         Download ZIP. Pak de gedownloade ZIP-bestanden uit naar een gewenste locatie op je computer.
+   Ga naar de GazeDetectionApp GitHub repository https://github.com/WimAnker/GazeDetectionApp en download de bestanden door te klikken     op de groene knop Code en te kiezen voor Download ZIP. (zorg ervoor dat je de master branch geselecteerd hebt als dat nodig is).
+   Pak de gedownloade ZIP-bestanden uit naar een gewenste locatie op je computer.
+   
 
 4. **Installeer vereiste pakketten**:
    - Navigeer naar de map waar je de projectbestanden hebt uitgepakt.
