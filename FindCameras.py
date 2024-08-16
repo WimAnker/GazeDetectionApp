@@ -14,7 +14,7 @@ open_camera_windows = []
 
 # Function to detect connected cameras
 def detect_cameras():
-    root.config(cursor="wait")
+    root.config(cursor="watch")
     root.update_idletasks()
     index = 0
     cameras = []
@@ -41,7 +41,7 @@ def save_selected_cameras():
 
 # Function to show live feed from a camera
 def show_camera_feed(port):
-    root.config(cursor="wait")
+    root.config(cursor="watch")
     root.update_idletasks()
     cap = cv2.VideoCapture(port)
     if not cap.isOpened():
@@ -103,7 +103,7 @@ save_button.grid(row=len(connected_cameras), column=0, columnspan=3, padx=10, pa
 
 # Function to handle window close event
 def on_closing():
-    root.config(cursor="wait")
+    root.config(cursor="watch")
     for window in open_camera_windows:
         try:
             if cv2.getWindowProperty(window, cv2.WND_PROP_VISIBLE) >= 1:

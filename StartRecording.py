@@ -13,6 +13,7 @@ try:
 except ImportError:
     pyttsx3 = None
 
+
 # Function to load settings from a JSON file
 def load_settings():
     try:

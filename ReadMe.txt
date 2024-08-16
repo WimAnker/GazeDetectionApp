@@ -6,7 +6,7 @@ Dit project bevat een desktop applicatie geschreven in Python, gebruikmakend van
 
 - Python 3.x
 - Tkinter (meestal standaard inbegrepen bij Python)
-- Vereiste Python pakketten (zie `requirements.txt`)
+- Vereiste Python-pakketten (zie `requirements_linux.txt` of `requirements_windows.txt`, afhankelijk van je besturingssysteem)
 
 ## Installatie en Uitvoering
 
@@ -18,22 +18,21 @@ Dit project bevat een desktop applicatie geschreven in Python, gebruikmakend van
 
 2. **Download de projectbestanden**:
    - Download de projectmap van OSF en pak de bestanden uit naar een gewenste locatie op je computer.
-
+   
     OF
 
-   Ga naar de GazeDetectionApp GitHub repository https://github.com/WimAnker/GazeDetectionApp en download de bestanden door te klikken     op de groene knop Code en te kiezen voor Download ZIP. (zorg ervoor dat je de master branch geselecteerd hebt als dat nodig is).
-   Pak de gedownloade ZIP-bestanden uit naar een gewenste locatie op je computer.
-
+   - Ga naar de GazeDetectionApp GitHub repository: https://github.com/WimAnker/GazeDetectionApp en download de bestanden door te klikken op de groene knop **Code** en te kiezen voor **Download ZIP**. (Zorg ervoor dat je de `master` branch geselecteerd hebt als dat nodig is).
+   - Pak de gedownloade ZIP-bestanden uit naar een gewenste locatie op je computer.
 
 3. **Installeer vereiste pakketten**:
    - Open een command prompt (cmd) en navigeer naar de map waar je de projectbestanden hebt uitgepakt.
    - Voer het volgende commando uit om de benodigde pakketten te installeren:
      ```sh
-     pip install -r requirements.txt
+     pip install -r requirements_windows.txt
      ```
 
 4. **Voer de applicatie uit**:
-   - Run het hoofd Python bestand:
+   - Run het hoofd Python-bestand:
      ```sh
      python GazeDetection.py
      ```
@@ -57,42 +56,29 @@ Dit project bevat een desktop applicatie geschreven in Python, gebruikmakend van
      sudo apt install python3-tk
      ```
 
-3. **Download de projectbestanden**:
-   - Download de projectmap van OSF en pak de bestanden uit naar een gewenste locatie op je computer.
+3. **Installeer de vereisten voor PyAudio**:
+   - Voordat je `PyAudio` installeert, moet je eerst `portaudio19-dev` installeren:
+     ```sh
+     sudo apt-get install portaudio19-dev
+     ```
 
-   OF
+4. **Download de projectbestanden**:
+   - Ga naar de GazeDetectionApp GitHub repository: https://github.com/WimAnker/GazeDetectionApp en download de bestanden door te klikken op de groene knop **Code** en te kiezen voor **Download ZIP**. (Zorg ervoor dat je de `master` branch geselecteerd hebt als dat nodig is).
+   - Pak de gedownloade ZIP-bestanden uit naar een gewenste locatie op je computer.
 
-   Ga naar de GazeDetectionApp GitHub repository https://github.com/WimAnker/GazeDetectionApp en download de bestanden door te klikken     op de groene knop Code en te kiezen voor Download ZIP. (zorg ervoor dat je de master branch geselecteerd hebt als dat nodig is).
-   Pak de gedownloade ZIP-bestanden uit naar een gewenste locatie op je computer.
-   
-
-4. **Installeer vereiste pakketten**:
+5. **Installeer vereiste pakketten**:
    - Navigeer naar de map waar je de projectbestanden hebt uitgepakt.
    - Voer het volgende commando uit om de benodigde pakketten te installeren:
      ```sh
-     pip3 install -r requirements.txt
+     pip3 install -r requirements_linux.txt
      ```
-   Het kan voorkomen dat pip niet is geinstalleerd. (dan komt er een foutmelding op bovenstaande commando).
-   Doe dit dan eerst met de volgende commando's:
 
-   # Update de pakketlijst
-   sudo apt update
-
-   # Installeer pip3
-   sudo apt install python3-pip
-
-   # Controleer of pip3 correct is geïnstalleerd
-   pip3 --version
-
-   Voer vervolgens het commando pip install -r requirements.txt (nogmaals) uit.
-
-
-5. **Voer de applicatie uit**:
-   - Run het hoofd Python bestand:
+6. **Voer de applicatie uit**:
+   - Run het hoofd Python-bestand:
      ```sh
      python3 GazeDetection.py
      ```
 
 ## Contact
 
-Voor vragen of problemen, neem contact op met [wimanker@outlook.com].
+Voor vragen of problemen, neem contact op met de projectbeheerder via GitHub.

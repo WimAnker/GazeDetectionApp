@@ -1,6 +1,11 @@
 import tkinter as tk
 from tkinter import Menu
 import subprocess
+import sys
+import platform
+
+# Bepaal het juiste Python-commando op basis van het besturingssysteem
+python_command = "python" if platform.system() == "Windows" else "python3"
 
 # Function to run external scripts with the main window's position
 def run_script(script_name, root):
@@ -9,7 +14,7 @@ def run_script(script_name, root):
         y = root.winfo_rooty()
         width = root.winfo_width()
         height = root.winfo_height()
-        p = subprocess.Popen(['python', script_name, str(x), str(y), str(width), str(height)])
+        p = subprocess.Popen([python_command, script_name, str(x), str(y), str(width), str(height)])
         subprocesses.append(p)
     except Exception as e:
         print(f"Failed to run {script_name}: {e}")
