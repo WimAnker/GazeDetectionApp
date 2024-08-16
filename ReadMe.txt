@@ -72,6 +72,20 @@ Dit project bevat een desktop applicatie geschreven in Python, gebruikmakend van
      ```sh
      pip3 install -r requirements.txt
      ```
+   Het kan voorkomen dat pip niet is geinstalleerd. (dan komt er een foutmelding op bovenstaande commando).
+   Doe dit dan eerst met de volgende commando's:
+
+   # Update de pakketlijst
+   sudo apt update
+
+   # Installeer pip3
+   sudo apt install python3-pip
+
+   # Controleer of pip3 correct is geïnstalleerd
+   pip3 --version
+
+   Voer vervolgens het commando pip install -r requirements.txt (nogmaals) uit.
+
 
 5. **Voer de applicatie uit**:
    - Run het hoofd Python bestand:
