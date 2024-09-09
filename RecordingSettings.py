@@ -16,7 +16,9 @@ def save_settings():
         "base_path": base_path_var.get(),
         "recording_name": recording_name_var.get(),
         "max_selections_per_label": max_selections_per_label_var.get(),
-        "wait_seconds": wait_seconds_var.get()
+        "wait_seconds": wait_seconds_var.get(),
+        "resolution": resolution_var.get(),
+        "framerate": framerate_var.get()
     }
     
     with open('recording_settings.json', 'w') as file:
@@ -35,6 +37,8 @@ def load_settings():
         recording_name_var.set(settings["recording_name"])
         max_selections_per_label_var.set(settings["max_selections_per_label"])
         wait_seconds_var.set(settings.get("wait_seconds", 2))  # Default to 2 seconds if not found
+        resolution_var.set(settings.get("resolution", "640x480"))  # Default resolution
+        framerate_var.set(settings.get("framerate", 20))  # Default framerate
     except FileNotFoundError:
         messagebox.showwarning("Warning", "No saved settings found")
         return
@@ -68,25 +72,11 @@ base_path_var = tk.StringVar()
 recording_name_var = tk.StringVar()
 max_selections_per_label_var = tk.StringVar()
 wait_seconds_var = tk.IntVar()
+resolution_var = tk.StringVar()
+framerate_var = tk.IntVar()
 
 # Load the settings when the application starts
 load_settings()
-
-# Function to validate numeric input for max selections per label
-def validate_max_selecties(P):
-    if P.isdigit() and len(P) <= 2:
-        return True
-    return False
-
-# Function to validate numeric input for wait seconds
-def validate_wait_seconds(P):
-    if P.isdigit() and len(P) <= 2:
-        return True
-    return False
-
-# Register the validation functions
-vcmd_selecties = (root.register(validate_max_selecties), '%P')
-vcmd_wait_seconds = (root.register(validate_wait_seconds), '%P')
 
 # Create and grid the labels and entry fields
 ttk.Label(root, text="Recording Duration").grid(row=0, column=0, padx=10, pady=5, sticky=tk.W)
@@ -102,17 +92,23 @@ ttk.Label(root, text="Name Recording").grid(row=2, column=0, padx=10, pady=5, st
 ttk.Entry(root, textvariable=recording_name_var, width=40).grid(row=2, column=1, padx=10, pady=5, sticky=tk.W)
 
 ttk.Label(root, text="Max Selections per Label").grid(row=3, column=0, padx=10, pady=5, sticky=tk.W)
-ttk.Entry(root, textvariable=max_selections_per_label_var, width=5, validate="key", validatecommand=vcmd_selecties).grid(row=3, column=1, padx=10, pady=5, sticky=tk.W)
+ttk.Entry(root, textvariable=max_selections_per_label_var, width=5).grid(row=3, column=1, padx=10, pady=5, sticky=tk.W)
 
 ttk.Label(root, text="Wait Seconds").grid(row=4, column=0, padx=10, pady=5, sticky=tk.W)
-ttk.Entry(root, textvariable=wait_seconds_var, width=5, validate="key", validatecommand=vcmd_wait_seconds).grid(row=4, column=1, padx=10, pady=5, sticky=tk.W)
+ttk.Entry(root, textvariable=wait_seconds_var, width=5).grid(row=4, column=1, padx=10, pady=5, sticky=tk.W)
+
+ttk.Label(root, text="Resolution (e.g., 640x480)").grid(row=5, column=0, padx=10, pady=5, sticky=tk.W)
+ttk.Entry(root, textvariable=resolution_var, width=40).grid(row=5, column=1, padx=10, pady=5, sticky=tk.W)
+
+ttk.Label(root, text="Framerate (10-30)").grid(row=6, column=0, padx=10, pady=5, sticky=tk.W)
+ttk.Entry(root, textvariable=framerate_var, width=5).grid(row=6, column=1, padx=10, pady=5, sticky=tk.W)
 
 # Add Save and Load buttons
 save_button = ttk.Button(root, text="Save Settings", command=save_settings)
-save_button.grid(row=5, column=0, padx=10, pady=10, sticky=tk.W)
+save_button.grid(row=7, column=0, padx=10, pady=10, sticky=tk.W)
 
 load_button = ttk.Button(root, text="Retrieve Settings", command=load_settings)
-load_button.grid(row=5, column=1, padx=10, pady=10, sticky=tk.E)
+load_button.grid(row=7, column=1, padx=10, pady=10, sticky=tk.E)
 
 # Run the main event loop
 root.mainloop()

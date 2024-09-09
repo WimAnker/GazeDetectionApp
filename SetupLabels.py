@@ -60,7 +60,7 @@ frame = ttk.Frame(root, padding="10")
 frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 
 # Add column headers
-columns = ["Label", "Label (NL)", "Label (EN)", "Gaze Direction", "Sentence", "Dutch Translation", "Use (Yes/No)"]
+columns = ["#", "Label", "Label (NL)", "Label (EN)", "Gaze Direction", "Sentence", "Dutch Translation", "Use (Yes/No)"]
 for col_num, header in enumerate(columns):
     ttk.Label(frame, text=header).grid(row=0, column=col_num, padx=5, pady=2)
 
@@ -87,14 +87,20 @@ except FileNotFoundError:
 
 for row_num, row_data in enumerate(table_data):
     row_entries = []
+
+    # Add row number
+    row_number_label = ttk.Label(frame, text=str(row_num + 1))
+    row_number_label.grid(row=row_num + 1, column=0, padx=5, pady=2)
+
     for col_num, value in enumerate(row_data[:-1]):
         entry = ttk.Entry(frame)
-        entry.grid(row=row_num + 1, column=col_num, padx=5, pady=2)
+        entry.grid(row=row_num + 1, column=col_num + 1, padx=5, pady=2)
         entry.insert(0, value)
         row_entries.append(entry)
+
     use_var = tk.BooleanVar(value=row_data[-1])
     checkbutton = ttk.Checkbutton(frame, variable=use_var)
-    checkbutton.grid(row=row_num + 1, column=len(row_data) - 1, padx=5, pady=2)
+    checkbutton.grid(row=row_num + 1, column=len(row_data), padx=5, pady=2)
     row_entries.append(use_var)
     rows.append(row_entries)
 
@@ -102,7 +108,7 @@ for row_num, row_data in enumerate(table_data):
 save_button = ttk.Button(root, text="Save Labels", command=save_data)
 save_button.grid(row=1, column=0, sticky=tk.W, padx=10, pady=5)
 
-load_button = ttk.Button(root, text="Retreive Labels", command=load_data)
+load_button = ttk.Button(root, text="Retrieve Labels", command=load_data)
 load_button.grid(row=1, column=0, sticky=tk.E, padx=10, pady=5)
 
 # Load data when the application starts

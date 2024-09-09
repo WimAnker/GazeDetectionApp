@@ -66,11 +66,104 @@ def create_directory_structure(base_path, recording_name, labels, max_selections
 def load_selected_cameras():
     try:
         with open('selected_cameras.json', 'r') as file:
-            selected_cameras = json.load(file)
-        return selected_cameras
+            selected_cameras_data = json.load(file)
+        selected_indexes = [camera["index"] for camera in selected_cameras_data]
+        return selected_indexes
     except FileNotFoundError:
         print("No saved selected cameras found")
         return []
+
+# Function to initialize cameras
+def initialize_cameras(cameras):
+    captures = []
+    for camera in cameras:
+        cap = cv2.VideoCapture(camera)
+        captures.append(cap)
+    return captures
+
+# Function to stop the recording
+def stop_recording():
+    global running
+    running = False
+    if min(label_counts.values()) >= max_selections_per_label:
+        return
+    messagebox.showinfo("Info", "Recording stopped by user")
+
+# Function to select label and prepare for recording
+def select_label_and_prepare_recording():
+    global current_save_path, label_counts
+    available_labels = [label for label in label_counts if label_counts[label] < max_selections_per_label]
+    selected_label = random.choice(available_labels)  # Randomly select a label
+    label_counts[selected_label] += 1
+    update_label_counts()
+    say_sentence(f"Please look at {selected_label.replace('_', ' ')}")
+    time.sleep(wait_seconds)  # Use the wait_seconds value from settings
+    say_sentence("Start")
+    
+    subfolder = (label_counts[selected_label] - 1) % max_selections_per_label + 1
+    current_save_path = [os.path.join(recording_path, selected_label, str(subfolder)) for _ in captures]
+
+# Function to update the label counts in the GUI
+def update_label_counts():
+    global label_list
+    label_list.set([f"{label}: {label_counts[label]}/{max_selections_per_label}" for label in label_counts])
+
+# Function to handle window close event
+def on_closing():
+    stop_recording()
+    root.destroy()
+
+# Function to start the recording process
+def start_recording():
+    global running, start_time, current_save_path, out_writers
+    running = True
+    out_writers = [None] * len(captures)  # Initialize out_writers
+    start_button.config(state=tk.DISABLED)  # Disable the start button after recording starts
+    while running:
+        if all(count >= max_selections_per_label for count in label_counts.values()):
+            # Wait for the last recording to complete before ending
+            time.sleep(recording_duration)  # Ensure the last recording lasts the full duration
+            break
+            
+        if current_save_path[0] is None or time.time() - start_time >= recording_duration:
+            select_label_and_prepare_recording()
+            start_time = time.time()
+
+            for i, out in enumerate(out_writers):
+                if out is not None:
+                    out.release()
+                    
+            fourcc = cv2.VideoWriter_fourcc(*'XVID')
+            for i, cap in enumerate(captures):
+                out_writers[i] = cv2.VideoWriter(os.path.join(current_save_path[i], f'camera_{selected_cameras[i]}.avi'), fourcc, 20.0, (640, 480))
+            
+        # Record video
+        for i, cap in enumerate(captures):
+            ret, frame = cap.read()
+            if ret:
+                out_writers[i].write(frame)
+
+        # Check if recording duration has been reached
+        if time.time() - start_time >= recording_duration:
+            for out in out_writers:
+                if out is not None:
+                    out.release()
+            current_save_path = [None] * len(captures)
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    # Inform the user the recording is complete
+    info_label.config(text="The recording is finished. You can close this window.")
+    messagebox.showinfo("Recording Finished", "The recording is finished. You can close this window.")
+
+    # Release all resources after message box is closed
+    for out in out_writers:
+        if out is not None:
+            out.release()
+    for cap in captures:
+        cap.release()
+    cv2.destroyAllWindows()
 
 # Load settings, labels, and selected cameras
 settings = load_settings()
@@ -94,60 +187,6 @@ recording_name = settings["recording_name"]
 max_selections_per_label = int(settings["max_selections_per_label"])
 wait_seconds = int(settings["wait_seconds"])
 
-# Detect connected cameras and check if they are selected
-def detect_cameras():
-    index = 0
-    cameras = []
-    while index < 10:  # Limit to first 10 indexes to prevent infinite loop
-        cap = cv2.VideoCapture(index)
-        if cap.isOpened():
-            cameras.append(index)
-        cap.release()
-        index += 1
-    return cameras
-
-detected_cameras = detect_cameras()
-active_cameras = [camera for camera in detected_cameras if camera in selected_cameras]
-
-if not active_cameras:
-    messagebox.showerror("Error", "No cameras selected or detected. Please select at least one camera.")
-    exit(1)
-
-label_counts = {label[0]: 0 for label in labels if label[-1]}
-recording_path = create_directory_structure(base_path, recording_name, labels, max_selections_per_label)
-current_save_path = [None] * len(active_cameras)
-start_time = None
-
-# Initialize camera capture objects
-captures = [cv2.VideoCapture(camera) for camera in active_cameras]
-out_writers = [None] * len(captures)
-
-# Function to select label and prepare for recording
-def select_label_and_prepare_recording():
-    global current_save_path, label_counts
-    available_labels = [label for label in label_counts if label_counts[label] < max_selections_per_label]
-    selected_label = random.choice(available_labels)  # Randomly select a label
-    label_counts[selected_label] += 1
-    update_label_counts()
-    say_sentence(f"Please look at {selected_label.replace('_', ' ')}")
-    time.sleep(wait_seconds)  # Use the wait_seconds value from settings
-    say_sentence("Start")
-    
-    subfolder = (label_counts[selected_label] - 1) % max_selections_per_label + 1
-    current_save_path = [os.path.join(recording_path, selected_label, str(subfolder)) for _ in captures]
-
-# Function to update the label counts in the GUI
-def update_label_counts():
-    label_list.set([f"{label}: {count}" for label, count in label_counts.items()])
-
-# Function to stop the recording
-def stop_recording():
-    global running
-    running = False
-    if min(label_counts.values()) >= max_selections_per_label:
-        return
-    messagebox.showinfo("Info", "Recording stopped by user")
-
 # Initialize the main window
 root = tk.Tk()
 root.title("Recording Control")
@@ -169,72 +208,59 @@ main_width = int(sys.argv[3])
 main_height = int(sys.argv[4])
 center_window(root, main_x, main_y, main_width, main_height)
 
-# Add a frame for the label counts
-frame = ttk.Frame(root)
-frame.grid(row=0, column=0, padx=20, pady=20)
+# Change cursor to watch during loading
+root.config(cursor="watch")
 
-# Create a listbox to display label counts
-label_list = tk.StringVar(value=[f"{label}: {count}" for label, count in label_counts.items()])
-listbox = tk.Listbox(frame, listvariable=label_list, height=15)  # Increase height for more labels
-listbox.grid(row=0, column=0)
+# Add a loading indicator (zandloper)
+loading_label = ttk.Label(root, text="Loading, please wait...", font=('Helvetica', 16))
+loading_label.grid(row=0, column=0, padx=20, pady=20)
 
-# Add a label to inform the user
-info_label = ttk.Label(root, text="If you want to stop, close this window.")
-info_label.grid(row=1, column=0, padx=20, pady=20)
+root.update()
 
-# Function to handle window close event
-def on_closing():
-    stop_recording()
-    root.destroy()
+# Initialize cameras in a separate thread to keep the GUI responsive
+def init_cameras_and_update_ui():
+    global captures, out_writers, label_counts, current_save_path, recording_path, label_list, info_label, start_button
+    captures = initialize_cameras(selected_cameras)
+    
+    # Remove the loading indicator
+    loading_label.grid_remove()
 
-root.protocol("WM_DELETE_WINDOW", on_closing)
+    # Reset cursor to normal after loading
+    root.config(cursor="")
+    
+    # Add the main UI elements after initialization
+    label_counts = {label[0]: 0 for label in labels if label[-1]}
+    recording_path = create_directory_structure(base_path, recording_name, labels, max_selections_per_label)
+    current_save_path = [None] * len(captures)
+    start_time = None
+    
+    # Add a frame for the label counts
+    frame = ttk.Frame(root)
+    frame.grid(row=0, column=0, padx=20, pady=20)
 
-# Start the recording in a separate thread
-def start_recording():
-    global running, start_time, current_save_path
-    running = True
-    while running:
-        if min(label_counts.values()) >= max_selections_per_label:
-            info_label.config(text="The recording is finished. You can close this window.")
-            break
-            
-        if current_save_path[0] is None or time.time() - start_time >= recording_duration:
-            select_label_and_prepare_recording()
-            start_time = time.time()
+    # Create a listbox to display label counts
+    label_list = tk.StringVar(value=[f"{label}: 0/{max_selections_per_label}" for label in label_counts])
+    listbox = tk.Listbox(frame, listvariable=label_list, height=15)  # Increase height for more labels
+    listbox.grid(row=0, column=0)
 
-            for i, out in enumerate(out_writers):
-                if out is not None:
-                    out.release()
-                    
-            fourcc = cv2.VideoWriter_fourcc(*'XVID')
-            for i, cap in enumerate(captures):
-                out_writers[i] = cv2.VideoWriter(os.path.join(current_save_path[i], f'camera_{active_cameras[i]}.avi'), fourcc, 20.0, (640, 480))
-            
-        for i, cap in enumerate(captures):
-            ret, frame = cap.read()
-            if ret:
-                out_writers[i].write(frame)
-                # cv2.imshow(f'Camera {active_cameras[i]}', frame)  # For debugging
+    # Add a label to inform the user
+    info_label = ttk.Label(root, text="Press 'Start Recording' to begin.")
+    info_label.grid(row=1, column=0, padx=20, pady=20)
 
-        if time.time() - start_time >= recording_duration:
-            for out in out_writers:
-                if out is not None:
-                    out.release()
-            current_save_path = [None] * len(active_cameras)
+    # Add a button to start recording
+    start_button = ttk.Button(root, text="Start Recording", command=lambda: start_recording_thread())
+    start_button.grid(row=2, column=0, padx=20, pady=20)
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+    root.update()
 
-    for out in out_writers:
-        if out is not None:
-            out.release()
-    for cap in captures:
-        cap.release()
-    cv2.destroyAllWindows()
+def start_recording_thread():
+    # Start the recording in a separate thread
+    recording_thread = threading.Thread(target=start_recording)
+    recording_thread.start()
 
-# Start recording in a new thread to keep the GUI responsive
-recording_thread = threading.Thread(target=start_recording)
-recording_thread.start()
+# Start the camera initialization in a separate thread
+init_thread = threading.Thread(target=init_cameras_and_update_ui)
+init_thread.start()
 
 # Run the main event loop
 root.mainloop()
