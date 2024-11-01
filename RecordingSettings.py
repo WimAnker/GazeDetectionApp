@@ -61,7 +61,7 @@ def center_window(root, main_x, main_y, main_width, main_height, width_percentag
 
 # Initialize the main window
 root = tk.Tk()
-root.title("Settings")
+root.title("Recording Settings")
 
 # Center and resize the window relative to the main window
 center_window(root, main_x, main_y, main_width, main_height)

@@ -23,3 +23,9 @@ SpeechRecognition==3.10.4
 tqdm==4.66.4
 typing_extensions==4.12.0
 urllib3==2.2.1
+torch==2.0.1+cpu
+torchvision==0.15.2+cpu
+torchaudio==2.0.2+cpu
+-f https://download.pytorch.org/whl/cpu
+pandas==2.0.3
+ultralytics==8.0.83  # Zorg ervoor dat je de juiste versie gebruikt

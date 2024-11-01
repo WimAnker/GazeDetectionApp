@@ -6,7 +6,7 @@ from tkinter import ttk, messagebox
 import random
 import shutil
 import threading
-import sys  # Import sys module
+import sys
 
 # Function to load settings from a JSON file
 def load_settings():
@@ -165,16 +165,28 @@ def process_dataset():
     root.config(cursor="")
     messagebox.showinfo("Info", "Dataset processing completed successfully")
 
+# Function to center the window relative to the main window
+def center_window(root, main_x, main_y, main_width, main_height, width_percentage=0.4, height_percentage=0.5):
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+    width = int(screen_width * width_percentage)
+    height = int(screen_height * height_percentage)
+    x = main_x + (main_width // 2) - (width // 2)
+    y = main_y + (main_height // 2) - (height // 2)
+    root.geometry(f'{width}x{height}+{x}+{y}')
+
 # Main application window
 root = tk.Tk()
 root.title("Prepare Dataset")
 
-# Center and resize the window relative to the main window
+# Get the main window's position and size from the command line arguments
 main_x = int(sys.argv[1])
 main_y = int(sys.argv[2])
 main_width = int(sys.argv[3])
 main_height = int(sys.argv[4])
-root.geometry(f'{main_width}x{main_height}+{main_x}+{main_y}')
+
+# Center and resize the window relative to the main window
+center_window(root, main_x, main_y, main_width, main_height)
 
 # Add Process Dataset button
 process_button = ttk.Button(root, text="Process Dataset", command=lambda: threading.Thread(target=process_dataset).start())

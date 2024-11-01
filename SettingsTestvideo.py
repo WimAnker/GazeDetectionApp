@@ -56,7 +56,7 @@ def browse_directory():
 
 # Initialize the main window
 root = tk.Tk()
-root.title("Recording Control")
+root.title("Recording Video Settings")
 
 # Check if the script received position and size parameters
 if len(sys.argv) == 5:

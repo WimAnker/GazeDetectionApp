@@ -1,48 +1,33 @@
+import os
+import json
 import tkinter as tk
 from tkinter import Menu, messagebox
 import subprocess
 import platform
-import json
 
-# Determine the correct Python command based on the operating system
+# Bepaal de juiste Python-opdracht op basis van het besturingssysteem
 python_command = "python" if platform.system() == "Windows" else "python3"
 
-# Function to run external scripts with the main window's position
+# Functie om externe scripts uit te voeren met de positie van het hoofdvenster
 def run_script(script_name, root):
     try:
+        print(f"Attempting to run: {script_name}")  # Debug statement
         x = root.winfo_rootx()
         y = root.winfo_rooty()
         width = root.winfo_width()
         height = root.winfo_height()
         p = subprocess.Popen([python_command, script_name, str(x), str(y), str(width), str(height)])
         subprocesses.append(p)
-        p.wait()  # Wait for the script to finish
+        p.wait()  # Wacht tot het script klaar is
     except Exception as e:
         print(f"Failed to run {script_name}: {e}")
 
-# Show a warning before running the camera positioning for test video creation
-def show_testvideo_warning():
-    warning_message = (
-        "Warning: For creating a test video, you should only select one camera. "
-        "Please ensure that only one camera is connected via the USB ports!"
-    )
-    messagebox.showinfo("Test Video Warning", warning_message)
-
-# Function to validate that only one camera is selected
-def validate_single_camera_selection():
-    try:
-        with open('selected_cameras.json', 'r') as file:
-            selected_cameras = json.load(file)
-        if len(selected_cameras) != 1:
-            messagebox.showerror("Error", "You must select exactly one camera for creating a test video.")
-            return False
-        return True
-    except FileNotFoundError:
-        messagebox.showerror("Error", "No cameras were selected. Please run the camera selection process again.")
-        return False
-
+# Functies om externe scripts aan te roepen:
 def collect_data_settings():
     run_script('RecordingSettings.py', root)
+
+def setup_labels():
+    run_script('SetupLabels.py', root)
 
 def collect_data_cameras_positioning():
     run_script('FindCameras.py', root)
@@ -50,34 +35,35 @@ def collect_data_cameras_positioning():
 def collect_data_start_recording_script():
     run_script('StartRecording.py', root)
 
-def setup_labels():
-    run_script('SetupLabels.py', root)
-
-def start_recording_testvideo():
-    run_script('StartRecordingTestvideo.py', root)
-
-def settings_testvideo():
-    run_script('SettingsTestvideo.py', root)
-
-def create_testvideo_cameras_positioning():
-    show_testvideo_warning()  # Show the warning for test video
-    run_script('FindCameras.py', root)
-    if not validate_single_camera_selection():
-        return
-
-def annotate_video():
-    run_script('AnnotateVideo.py', root)
-
-def compare_test_and_model_annotation():
-    run_script('CompareTestAndModelAnnotation.py', root)
-
+# Prepare Data
 def prepare_settings():
     run_script('PrepareSettings.py', root)
 
 def prepare_data_for_training():
     run_script('PrepareDataset.py', root)
 
-# Function to center the window
+# Create Video
+def start_recording_testvideo():
+    run_script('StartRecordingTestvideo.py', root)
+
+def settings_testvideo():
+    run_script('SettingsTestvideo.py', root)
+
+# Annotate Video (model based)
+def settings_annotate_video():
+    run_script('SettingsAnnotateVideo.py', root)
+
+def annotate_video():
+    run_script('AnnotateVideo.py', root)
+
+# Annotate Video (audio based)
+def annotate_video_audio():
+    run_script('AnnotateVideoAudio.py', root)
+
+def compare_test_and_model_annotation():
+    run_script('CompareTestAndModelAnnotation.py', root)
+
+# Functie om het hoofdvenster te centreren
 def center_window(root, width_percentage=0.5, height_percentage=0.5):
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
@@ -87,58 +73,55 @@ def center_window(root, width_percentage=0.5, height_percentage=0.5):
     y = (screen_height - height) // 2
     root.geometry(f'{width}x{height}+{x}+{y}')
 
-# Function to handle window close event
+# Functie om venster sluiting af te handelen
 def on_closing():
     for p in subprocesses:
         p.terminate()
     root.destroy()
 
-# Initialize the main window
+# Initialiseer het hoofdvenster
 root = tk.Tk()
 root.title("Application")
 
-# Center and resize the window
+# Centreer en pas venstergrootte aan
 center_window(root)
 
-# Create a list to track subprocesses
+# Lijst om subprocessen bij te houden
 subprocesses = []
 
-# Create a menu bar
+# Menu bar maken
 menu_bar = Menu(root)
 
-# Create "Collect Data" submenu
-collect_data_menu = Menu(menu_bar, tearoff=0)
-collect_data_menu.add_command(label="Settings Test Recording", command=collect_data_settings)
-collect_data_menu.add_command(label="Setup Labels", command=setup_labels)
-collect_data_menu.add_command(label="Cameras and Positioning", command=collect_data_cameras_positioning)
-collect_data_menu.add_command(label="Start Recording Script", command=collect_data_start_recording_script)
-menu_bar.add_cascade(label="Collect Data", menu=collect_data_menu)
+# Voeg de submenu's toe zoals eerder
+create_data_menu = Menu(menu_bar, tearoff=0)
+create_data_menu.add_command(label="Settings Recording", command=collect_data_settings)
+create_data_menu.add_command(label="Setup Labels", command=setup_labels)
+create_data_menu.add_command(label="Cameras and Positioning", command=collect_data_cameras_positioning)
+create_data_menu.add_command(label="Start Recording Script", command=collect_data_start_recording_script)
+menu_bar.add_cascade(label="Create Data", menu=create_data_menu)
 
-# Create "Prepare Data" submenu
 prepare_data_menu = Menu(menu_bar, tearoff=0)
 prepare_data_menu.add_command(label="Settings for Prepare Data", command=prepare_settings)
 prepare_data_menu.add_command(label="Prepare Data for Training", command=prepare_data_for_training)
 menu_bar.add_cascade(label="Prepare Data", menu=prepare_data_menu)
 
-# Create "Create Testvideo" submenu
-create_testvideo_menu = Menu(menu_bar, tearoff=0)
-create_testvideo_menu.add_command(label="Settings Testvideo", command=settings_testvideo)
-create_testvideo_menu.add_command(label="Setup Labels", command=setup_labels)
-create_testvideo_menu.add_command(label="Cameras and Positioning", command=create_testvideo_cameras_positioning)
-create_testvideo_menu.add_command(label="Start Recording Testvideo", command=start_recording_testvideo)
-menu_bar.add_cascade(label="Create Testvideo", menu=create_testvideo_menu)
+create_video_menu = Menu(menu_bar, tearoff=0)
+create_video_menu.add_command(label="Settings Video", command=settings_testvideo)
+create_video_menu.add_command(label="Recording Video", command=start_recording_testvideo)
+menu_bar.add_cascade(label="Create Video", menu=create_video_menu)
 
-# Add "Annotate Video" option to the menu bar
-menu_bar.add_command(label="Annotate Video", command=annotate_video)
+# "Annotate Video" submenu
+annotate_video_menu = Menu(menu_bar, tearoff=0)
+annotate_video_menu.add_command(label="Settings Annotate Video", command=settings_annotate_video)
+annotate_video_menu.add_command(label="Annotate Video (model based)", command=annotate_video)
+annotate_video_menu.add_command(label="Annotate Video (audio based)", command=annotate_video_audio)
+menu_bar.add_cascade(label="Annotate Video", menu=annotate_video_menu)
 
-# Add "Compare Test- and Model Annotation" option to the menu bar
-menu_bar.add_command(label="Compare Test- and Model Annotation", command=compare_test_and_model_annotation)
+menu_bar.add_command(label="Compare Video- and Model Annotation", command=compare_test_and_model_annotation)
 
-# Add the menu bar to the root window
 root.config(menu=menu_bar)
 
-# Set the protocol for handling window close event
 root.protocol("WM_DELETE_WINDOW", on_closing)
 
-# Run the main event loop
+# Start de hoofdlus
 root.mainloop()

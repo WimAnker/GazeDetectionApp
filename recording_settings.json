@@ -1,1 +1,1 @@
-{"recording_duration": 5, "base_path": "C:/GazeDetection", "recording_name": "cameratesten3008_5", "max_selections_per_label": "2", "wait_seconds": 3, "resolution": "640x480", "framerate": 20}
+{"recording_duration": 5, "base_path": "C:/GazeDetection", "recording_name": "ArdJan", "max_selections_per_label": "10", "wait_seconds": 3, "resolution": "640x480", "framerate": 30}

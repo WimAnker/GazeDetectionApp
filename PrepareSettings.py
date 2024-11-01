@@ -10,7 +10,7 @@ main_width = int(sys.argv[3])
 main_height = int(sys.argv[4])
 
 # Function to center a window relative to the main window
-def center_window(root, main_x, main_y, main_width, main_height, width_percentage=0.8, height_percentage=0.8):
+def center_window(root, main_x, main_y, main_width, main_height, width_percentage=0.5, height_percentage=0.5):
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
     width = int(screen_width * width_percentage)
