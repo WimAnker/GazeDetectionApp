@@ -1,0 +1,88 @@
+Installation Instructions for Gaze Detection Application
+
+This guide will walk you through the steps to clone the repository from GitHub and install the necessary dependencies
+to run the Gaze Detection Application on your PC.
+
+Prerequisites
+- Python 3.7+: Ensure Python is installed on your system. You can download it from https://www.python.org/downloads/.
+- Git: You will need Git to clone the repository. Install it from https://git-scm.com/downloads.
+
+Step 1: Clone the Repository
+Open a terminal or command prompt and use the following command to clone the repository (replace username/repository with the actual path):
+
+    git clone https://github.com/username/repository.git
+    cd repository
+
+Step 2: Install Required Libraries
+The project requires specific Python libraries. You can install them using pip:
+
+For Windows:
+    pip install -r requirements_windows.txt
+
+For Linux:
+    pip install -r requirements_linux.txt
+
+Note for Linux CUDA Users: If you have a CUDA-compatible GPU and want to enable GPU-optimized PyTorch, consider adding
+the following line to requirements_linux.txt:
+    -f https://download.pytorch.org/whl/torch_stable.html
+
+Step 3: Run the Application
+To start the application, run the main script using Python:
+
+    python GazeDetection.py
+
+This will launch the application's main interface.
+
+-----------------------------------
+
+Adjusting Camera and Audio Settings in StartRecordingTestVideo.py
+In the StartRecordingTestVideo.py script, (from the menu option create video*) the camera and microphone settings are pre-configured for a specific device.
+If you have a different camera or microphone connected, you will need to update this configuration.
+
+To find the correct camera and audio device names:
+
+1. Open a terminal or command prompt.
+2. Use the following command to list available devices:
+
+    ffmpeg -list_devices true -f dshow -i dummy
+
+3. Look for the camera and microphone names displayed under "DirectShow video devices" and "DirectShow audio devices".
+
+4. Once you have identified the correct device names, replace them in the script at this line:
+
+    ffmpeg_command = (
+        f'ffmpeg -y -f dshow -audio_buffer_size 50 -rtbufsize 512M '
+        f'-i video="Your Camera Name Here":audio="Your Microphone Name Here" '
+        f'-t 3600 -c:v libx264 -c:a aac -ar 44100 -async 1 "{output_file}"'
+    )
+
+*. The menu "Create Data" option will automatically detect the connected cameras, no changes in code required. 
+
+Replace "Your Camera Name Here" and "Your Microphone Name Here" with the exact names from the list. Ensure there are no
+extra spaces around the names.
+
+Script Descriptions
+git
+GazeDetection.py: The main script that launches the application's interface for managing and analyzing gaze data.
+
+CreateDatasetStructure.py: Initializes the necessary folder and file structure for storing datasets, making it easier to organize and manage recorded data.
+
+SetupLabels.py: Allows users to configure and set up labels for different gaze directions or actions, which are used later for annotation.
+
+FindCameras.py: Detects all connected cameras and provides a list, ensuring that the correct camera devices are available for data collection.
+
+StartRecording.py: Initiates the video recording process from the selected camera, capturing live footage for later analysis.
+
+StartRecordingTestVideo.py: A specific recording script that enables test video recording with custom settings. Users may need to adjust the camera and microphone settings based on connected devices.
+
+PrepareDataset.py: Prepares recorded videos and datasets for model training, applying necessary preprocessing steps.
+
+PrepareSettings.py: Configures various settings required for dataset preparation and model training, allowing users to customize parameters as needed.
+
+AnnotateVideo.py: Automates the annotation of recorded videos based on pre-set labels and detection models, facilitating gaze detection analysis.
+
+AnnotateVideoAudio.py: Provides audio-based annotation for videos, detecting specific audio cues to aid in gaze analysis.
+
+CompareTestAndModelAnnotation.py: Compares manual and model-based annotations, highlighting any discrepancies for evaluation purposes.
+
+
