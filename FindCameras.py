@@ -2,67 +2,73 @@ import cv2
 import tkinter as tk
 from tkinter import ttk, messagebox
 import json
-import sys
-
-# Get the main window's position and size from the command line arguments
-main_x = int(sys.argv[1])
-main_y = int(sys.argv[2])
-main_width = int(sys.argv[3])
-main_height = int(sys.argv[4])
+import os
+import platform
 
 open_camera_windows = []
 
-# Load the camera list from a JSON file
-def load_camera_list_from_json(file_path):
-    with open(file_path, 'r') as file:
-        camera_list = json.load(file)
-    return camera_list
-
-# Step 1: Detect connected cameras using OpenCV
+# Function to detect connected cameras
 def detect_cameras():
-    root.config(cursor="watch")
+    root.config(cursor="watch")  # Show busy cursor
     root.update_idletasks()
     cameras = []
+
+    # Detecteer het huidige besturingssysteem
+    os_type = platform.system()
     
-    for index in range(10):  # Limit to first 10 indexes to prevent infinite loop
-        cap = cv2.VideoCapture(index)
-        if cap.isOpened():
-            cameras.append(index)
-        cap.release()
-    
-    root.config(cursor="")
+    if os_type == "Windows":
+        # Gebruik indices voor Windows
+        for index in range(10):  # Check maximaal 10 indices
+            cap = cv2.VideoCapture(index)
+            if cap.isOpened():
+                ret, frame = cap.read()
+                if ret and frame is not None:  # Zorg ervoor dat de camera frames levert
+                    cameras.append(index)
+                cap.release()
+    elif os_type == "Linux":
+        # Gebruik /dev/video* voor Linux
+        for index in range(10):  # Controleer maximaal 10 apparaten
+            path = f"/dev/video{index}"
+            if os.path.exists(path):  # Controleer of het apparaatbestand bestaat
+                cap = cv2.VideoCapture(index)
+                if cap.isOpened():
+                    ret, frame = cap.read()
+                    if ret and frame is not None:  # Controleer of de camera frames levert
+                        cameras.append(index)
+                    cap.release()
+
+    root.config(cursor="")  # Reset cursor
     return cameras
 
 # Function to save selected cameras to a JSON file
 def save_selected_cameras():
     selected_cameras = []
-    for camera in camera_vars:
-        if camera[2].get():  # If the checkbox is selected
+    for var in camera_vars:
+        if var[1].get():  # If the checkbox is selected
             selected_cameras.append({
-                "index": camera[0], 
-                "name": camera[1], 
-                "video_path": camera[3], 
-                "audio_path": camera[4]
+                "index": var[0],  # Camera index
+                "name": f"Camera {camera_vars.index(var) + 1}"  # Automatically assigned name
             })
     
-    if selected_cameras:
-        with open('selected_cameras.json', 'w') as file:
-            json.dump(selected_cameras, file, indent=4)
-        messagebox.showinfo("Info", "Selected cameras saved successfully")
-    else:
-        messagebox.showwarning("Warning", "No cameras selected to save")
+    with open('selected_cameras.json', 'w') as file:
+        json.dump(selected_cameras, file, indent=4)
+    
+    messagebox.showinfo("Info", "Selected cameras saved successfully")
 
 # Function to show live feed from a camera
-def show_camera_feed(camera_index):
-    root.config(cursor="watch")
+def show_camera_feed(port):
+    root.config(cursor="watch")  # Show busy cursor
     root.update_idletasks()
-    cap = cv2.VideoCapture(camera_index)
+
+    cap = cv2.VideoCapture(port)
     if not cap.isOpened():
-        root.config(cursor="")
-        messagebox.showerror("Error", f"Cannot open camera {camera_index}")
+        root.config(cursor="")  # Reset cursor
+        messagebox.showerror("Error", f"Cannot open camera {port}")
         return
-    
-    window_name = f"Camera {camera_index}"
+
+    root.config(cursor="")  # Reset cursor after opening the camera
+
+    window_name = f"Camera {port}"
     cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
     open_camera_windows.append(window_name)
     
@@ -80,58 +86,43 @@ def show_camera_feed(camera_index):
             open_camera_windows.remove(window_name)
         except cv2.error as e:
             print(f"Error closing window {window_name}: {e}")
-    root.config(cursor="")
 
-# Function to center the window relative to the main window
-def center_window(root, main_x, main_y, main_width, main_height, width_percentage=0.5, height_percentage=0.5):
-    width = int(main_width * width_percentage)
-    height = int(main_height * height_percentage)
-    x = main_x + (main_width - width) // 2
-    y = main_y + (main_height - height) // 2
+# Function to center the window on the screen with adjusted dimensions
+def center_window(root, width_percentage=0.25, height_percentage=0.4):
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+    width = int(screen_width * width_percentage)
+    height = int(screen_height * height_percentage)
+    x = (screen_width - width) // 2
+    y = (screen_height - height) // 2
     root.geometry(f'{width}x{height}+{x}+{y}')
+    root.attributes("-topmost", True)  # Keep on top initially
+    root.after(100, lambda: root.attributes("-topmost", False))  # Allow other windows after focusing
 
 # Initialize the main window
 root = tk.Tk()
 root.title("Find Connected Cameras")
-
-# Center and resize the window relative to the main window
-center_window(root, main_x, main_y, main_width, main_height)
+center_window(root)
 
 # Detect connected cameras
-camera_indices = detect_cameras()
-
-# Load the camera list from the JSON file
-camera_list = load_camera_list_from_json('camera_list.json')
-
-# Combine camera indices with their names and paths from the JSON file
-combined_cameras = []
-for i, index in enumerate(camera_indices):
-    if i < len(camera_list):
-        name = camera_list[i]["name"]
-        video_path = camera_list[i]["video_path"]
-        audio_path = camera_list[i]["audio_path"]
-        combined_cameras.append((index, name, video_path, audio_path))
-    else:
-        combined_cameras.append((index, f"Camera {index}", None, None))
-
+connected_cameras = detect_cameras()
 camera_vars = []
 
 # Create and grid the labels, checkboxes, and test buttons
-for index, (camera_index, camera_name, video_path, audio_path) in enumerate(combined_cameras):
+for index, camera_index in enumerate(connected_cameras):
     camera_var = tk.BooleanVar()
-    ttk.Label(root, text=f"Camera {camera_index}: {camera_name}").grid(row=index, column=0, padx=10, pady=5, sticky=tk.W)
+    ttk.Label(root, text=f"Camera {index + 1} (Port {camera_index})").grid(row=index, column=0, padx=10, pady=5, sticky=tk.W)
     ttk.Checkbutton(root, variable=camera_var).grid(row=index, column=1, padx=10, pady=5, sticky=tk.W)
     test_button = ttk.Button(root, text="Test", command=lambda c=camera_index: show_camera_feed(c))
     test_button.grid(row=index, column=2, padx=10, pady=5, sticky=tk.W)
-    camera_vars.append((camera_index, camera_name, camera_var, video_path, audio_path))
+    camera_vars.append((camera_index, camera_var))
 
 # Add Save button
 save_button = ttk.Button(root, text="Save Selected Cameras", command=save_selected_cameras)
-save_button.grid(row=len(combined_cameras), column=0, columnspan=3, padx=10, pady=10)
+save_button.grid(row=len(connected_cameras), column=0, columnspan=3, padx=10, pady=10)
 
 # Function to handle window close event
 def on_closing():
-    root.config(cursor="watch")
     for window in open_camera_windows:
         try:
             if cv2.getWindowProperty(window, cv2.WND_PROP_VISIBLE) >= 1:
@@ -139,10 +130,8 @@ def on_closing():
         except cv2.error as e:
             print(f"Error closing window {window}: {e}")
     open_camera_windows.clear()
-    root.config(cursor="")
     root.destroy()
 
-# Set the protocol for handling window close event
 root.protocol("WM_DELETE_WINDOW", on_closing)
 
 # Run the main event loop

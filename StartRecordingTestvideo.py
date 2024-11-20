@@ -6,6 +6,15 @@ import subprocess
 import pyttsx3
 import json
 
+# Functie om camera-apparaatnamen te laden uit JSON
+def load_camera_names():
+    if os.path.exists("camera_names.json"):
+        with open("camera_names.json", "r") as json_file:
+            return json.load(json_file)
+    else:
+        messagebox.showerror("Error", "camera_names.json not found.")
+        return {"video_device": "", "audio_device": ""}
+
 # Functie om de instellingen uit de JSON-file te laden
 def load_settings():
     if os.path.exists("compare_settings.json"):
@@ -40,10 +49,14 @@ def start_recording_with_sentences():
     start_button_sentences.config(state=tk.DISABLED)
 
     settings = load_settings()
+    camera_names = load_camera_names()
     selected_labels = load_labels()
     
-    if not settings or not selected_labels:
+    if not settings or not selected_labels or not camera_names.get("video_device") or not camera_names.get("audio_device"):
         return
+
+    video_device = camera_names["video_device"]
+    audio_device = camera_names["audio_device"]
 
     num_sentences = int(settings.get("num_sentences", len(selected_labels)))
     interval_seconds = int(settings.get("interval_seconds", 5))
@@ -63,10 +76,10 @@ def start_recording_with_sentences():
     
     output_file = os.path.join(output_path, f"{base_name}_usb_camera.mp4")
 
-    # Gebruik één -f dshow optie en pas audio_buffer_size, samplefrequentie en async aan
+    # FFmpeg-opdracht met apparaten uit JSON
     ffmpeg_command = (
         f'ffmpeg -y -f dshow -audio_buffer_size 50 -rtbufsize 512M '
-        f'-i video="HD Pro Webcam C920":audio="Microfoon (HD Pro Webcam C920)" '
+        f'-i video="{video_device}":audio="{audio_device}" '
         f'-t {duration} -c:v libx264 -c:a aac -ar 44100 -async 1 "{output_file}"'
     )
 
@@ -94,9 +107,13 @@ def start_recording_no_sentences():
     stop_button_live.config(state=tk.NORMAL)
 
     settings = load_settings()
+    camera_names = load_camera_names()
 
-    if not settings:
+    if not settings or not camera_names.get("video_device") or not camera_names.get("audio_device"):
         return
+
+    video_device = camera_names["video_device"]
+    audio_device = camera_names["audio_device"]
 
     output_path = settings.get("path", "")
     base_name = settings.get("name", "output_no_sentences")
@@ -107,10 +124,10 @@ def start_recording_no_sentences():
     global output_file
     output_file = os.path.join(output_path, f"{base_name}_usb_camera.mp4")
 
-    # Gebruik één -f dshow optie en pas audio_buffer_size, samplefrequentie en async aan
+    # FFmpeg-opdracht met apparaten uit JSON
     ffmpeg_command = (
         f'ffmpeg -y -f dshow -audio_buffer_size 50 -rtbufsize 512M '
-        f'-i video="HD Pro Webcam C920":audio="Microfoon (HD Pro Webcam C920)" '
+        f'-i video="{video_device}":audio="{audio_device}" '
         f'-t 3600 -c:v libx264 -c:a aac -ar 44100 -async 1 "{output_file}"'
     )
 

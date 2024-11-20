@@ -46,15 +46,20 @@ To find the correct camera and audio device names:
 
     ffmpeg -list_devices true -f dshow -i dummy
 
-3. Look for the camera and microphone names displayed under "DirectShow video devices" and "DirectShow audio devices".
+3. Look for the camera and microphone names displayed under "DirectShow video devices" and "DirectShow audio devices". 
+   Noteer de exacte namen, bijvoorbeeld:
 
-4. Once you have identified the correct device names, replace them in the script at this line:
+    Videoapparaat: "HD Pro Webcam C920"
+    Audioapparaat: "Microfoon (2- HD Pro Webcam C920)"
 
-    ffmpeg_command = (
-        f'ffmpeg -y -f dshow -audio_buffer_size 50 -rtbufsize 512M '
-        f'-i video="Your Camera Name Here":audio="Your Microphone Name Here" '
-        f'-t 3600 -c:v libx264 -c:a aac -ar 44100 -async 1 "{output_file}"'
-    )
+4. Open het bestand camera_names.json in een teksteditor en voer de genoteerde namen in. Het bestand zou er als volgt uit moeten zien:
+
+{
+    "video_device": "HD Pro Webcam C920",
+    "audio_device": "Microfoon (2- HD Pro Webcam C920)"
+}
+   
+5. Sla het bestand camera_names.json op in dezelfde map als het script.
 
 *. The menu "Create Data" option will automatically detect the connected cameras, no changes in code required. 
 
