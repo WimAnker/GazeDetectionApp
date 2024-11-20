@@ -28,4 +28,5 @@ torchvision==0.15.2+cpu
 torchaudio==2.0.2+cpu
 -f https://download.pytorch.org/whl/cpu
 pandas==2.0.3
-ultralytics==8.0.83  # Zorg ervoor dat je de juiste versie gebruikt
+ultralytics==8.0.83
+whisper==1.0

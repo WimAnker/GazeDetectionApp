@@ -5,9 +5,8 @@ from tkinter import ttk, messagebox
 import subprocess
 import pyttsx3
 import json
-import signal
 
-# Functie om de instellingen uit de JSON file te laden
+# Functie om de instellingen uit de JSON-file te laden
 def load_settings():
     if os.path.exists("compare_settings.json"):
         with open("compare_settings.json", "r") as json_file:
@@ -16,7 +15,7 @@ def load_settings():
         messagebox.showerror("Error", "Settings file not found.")
         return {}
 
-# Functie om labels te laden uit de JSON file
+# Functie om labels te laden uit de JSON-file
 def load_labels():
     if os.path.exists("label_data.json"):
         with open("label_data.json", "r") as json_file:
@@ -64,13 +63,11 @@ def start_recording_with_sentences():
     
     output_file = os.path.join(output_path, f"{base_name}_usb_camera.mp4")
 
-    video_device = 'video="HD Pro Webcam C920"'
-    audio_device = 'audio="Microfoon (HD Pro Webcam C920)"'
-
+    # Gebruik één -f dshow optie en pas audio_buffer_size, samplefrequentie en async aan
     ffmpeg_command = (
-        f'ffmpeg -y -f dshow -rtbufsize 512M -i {video_device} '
-        f'-f dshow -rtbufsize 512M -i {audio_device} '
-        f'-t {duration} -c:v libx264 -c:a aac -strict experimental "{output_file}"'
+        f'ffmpeg -y -f dshow -audio_buffer_size 50 -rtbufsize 512M '
+        f'-i video="HD Pro Webcam C920":audio="Microfoon (HD Pro Webcam C920)" '
+        f'-t {duration} -c:v libx264 -c:a aac -ar 44100 -async 1 "{output_file}"'
     )
 
     print(f"Running FFmpeg command: {ffmpeg_command}")
@@ -110,14 +107,11 @@ def start_recording_no_sentences():
     global output_file
     output_file = os.path.join(output_path, f"{base_name}_usb_camera.mp4")
 
-    video_device = 'video="HD Pro Webcam C920"'
-    audio_device = 'audio="Microfoon (HD Pro Webcam C920)"'
-
-    # Start opname met een lange standaardduur van 1 uur
+    # Gebruik één -f dshow optie en pas audio_buffer_size, samplefrequentie en async aan
     ffmpeg_command = (
-        f'ffmpeg -y -f dshow -rtbufsize 512M -i {video_device} '
-        f'-f dshow -rtbufsize 512M -i {audio_device} '
-        f'-t 3600 -c:v libx264 -c:a aac -strict experimental "{output_file}"'
+        f'ffmpeg -y -f dshow -audio_buffer_size 50 -rtbufsize 512M '
+        f'-i video="HD Pro Webcam C920":audio="Microfoon (HD Pro Webcam C920)" '
+        f'-t 3600 -c:v libx264 -c:a aac -ar 44100 -async 1 "{output_file}"'
     )
 
     print(f"Running FFmpeg command: {ffmpeg_command}")
